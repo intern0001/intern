@@ -64,8 +64,8 @@ jobs:
       - name: check
         run: docker images
       - name: tag
-        run: docker tag private-ecr:latest 548844171305.dkr.ecr.us-east-1.amazonaws.com/private-ecr:v0.4.${{ github.run_number }}
+        run: docker tag private-ecr:latest 548844171305.dkr.ecr.us-east-1.amazonaws.com/private-ecr:v0.4.${{ github.run_attempt }}
       - name: push
-        run: docker push 548844171305.dkr.ecr.us-east-1.amazonaws.com/private-ecr:v0.4.${{ github.run_number }}
+        run: docker push 548844171305.dkr.ecr.us-east-1.amazonaws.com/private-ecr:v0.4.${{ github.run_attempt }}
       - name: last
         run: docker images
