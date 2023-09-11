@@ -38,7 +38,7 @@ jobs:
       - name: Terragrunt Init
         id: init
         run: terragrunt run-all init
-      - name: Terragrunt Apply
-        id: apply
+      - name: Terragrunt Destroy
+        id: destroy
         run: terragrunt run-all destroy --terragrunt-non-interactive  
         
