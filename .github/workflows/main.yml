@@ -1,0 +1,71 @@
+name: "My first CI"
+
+on: 
+  push:
+    branches: 
+      - main
+
+jobs:
+  terragrunt:
+    name: Terragrunt
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+    env:
+      WORKING_DIRECTORY: project/environments/dev/us-east-1/
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+          
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.5
+          terraform_wrapper: false
+
+      - name: Setup Terragrunt
+        uses: autero1/action-terragrunt@v1.1.0
+        with:
+          terragrunt_version: 0.35.12
+      - name: Terragrunt Init
+        id: init
+        run: terragrunt run-all init
+      - name: Terragrunt Apply
+        id: apply
+        run: terragrunt run-all apply --terragrunt-non-interactive  
+        
+  my_deploy:
+    runs-on: [ubuntu-latest]
+    needs: [terragrunt]    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: test
+        run: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 548844171305.dkr.ecr.us-east-1.amazonaws.com
+      - name: build
+        run: docker build -t private-ecr .
+      - name: check
+        run: docker images
+      - name: tag
+        run: docker tag private-ecr:latest 548844171305.dkr.ecr.us-east-1.amazonaws.com/private-ecr:v0.4.${{ github.run_attempt }}
+      - name: push
+        run: docker push 548844171305.dkr.ecr.us-east-1.amazonaws.com/private-ecr:v0.4.${{ github.run_attempt }}
+      - name: last
+        run: docker images
