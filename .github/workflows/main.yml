@@ -21,12 +21,12 @@ jobs:
       - name: test
         run: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 548844171305.dkr.ecr.us-east-1.amazonaws.com
       - name: build
-        run: docker build -t private-ecr-dev .
+        run: docker build -t private-ecr-stage .
       - name: check
         run: docker images
       - name: tag
-        run: docker tag private-ecr-dev:latest 548844171305.dkr.ecr.us-east-1.amazonaws.com/private-ecr-dev:v0.4.${{ github.run_number }}
+        run: docker tag private-ecr-stage:latest 548844171305.dkr.ecr.us-east-1.amazonaws.com/private-ecr-stage:v0.4.${{ github.run_number }}
       - name: push
-        run: docker push 548844171305.dkr.ecr.us-east-1.amazonaws.com/private-ecr-dev:v0.4.${{ github.run_number }}
+        run: docker push 548844171305.dkr.ecr.us-east-1.amazonaws.com/private-ecr-stage:v0.4.${{ github.run_number }}
       - name: last
         run: docker images
